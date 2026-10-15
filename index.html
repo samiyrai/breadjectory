@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BREADJECTORY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="wave" aria-hidden="true"></canvas><div id="fade" aria-hidden="true"></div>
+<!-- 1. TITLE SCREEN -->
+<div class="screen" id="titleScreen">
+  <canvas id="intro" aria-hidden="true"></canvas>
+  <div class="titlebox">
+    <h1 class="brand" id="brand" aria-label="BREADJECTORY"></h1>
+    <p class="tagline">Launch forks. Build the sandwich. Have fun!</p>
+    <div class="actions" style="justify-content:center;align-items:center"><button class="btn btn-launch big" id="playBtn" type="button" style="flex:none">PLAY</button><button class="btn" id="tutBtn" type="button">Tutorial</button><button class="btn" id="profileBtn" type="button">Profile</button><button class="btn sfxBtn" type="button" aria-pressed="true">🔊</button></div>
+  </div>
+  <button class="sandy-hit" id="sandyHit" type="button" tabindex="-1" aria-label="Tap Sandy for a tip"></button>
+</div>
+
+<!-- 2. SETUP SCREEN -->
+<div class="screen" id="setupScreen" hidden>
+  <div class="sheet">
+    <div class="hrow"><canvas class="mychar" id="setupChar" width="90" height="110" aria-hidden="true"></canvas><h2>Welcome! Ready to cook?</h2></div>
+    <p class="hint" style="margin:0">After each round Sandy quizzes you. Right answers earn quiz points that unlock fancier sandwiches, from PB&amp;J up to the best one.</p>
+    <div class="setgrid">
+      <div class="field">
+        <label class="label" for="nameInput">Your name (required)</label>
+        <input id="nameInput" type="text" maxlength="14" autocomplete="nickname" placeholder="Up to 14 letters" required>
+        <span class="errmsg" id="nameErr" hidden>Please type your name to start.</span>
+      </div>
+      <div class="modes" role="radiogroup" aria-label="Difficulty">
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="easy"><span class="m-name">Easy</span><span class="m-meta">3:00 · no decoys</span><span class="m-blurb">Friendly and slow.</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="true" data-mode="medium"><span class="m-name">Medium</span><span class="m-meta">2:00 · some decoys</span><span class="m-blurb">Extra ingredients to dodge.</span></button>
+        <button class="mode" type="button" role="radio" aria-checked="false" data-mode="hard"><span class="m-name">Hard</span><span class="m-meta">1:00 · decoys + rotten</span><span class="m-blurb warn">⚠ Hit a rotten layer and you lose ALL lives!</span></button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="hideArrow"><span>Hide the arrow<small>No yellow marker. Find the ingredient yourself.</small></span></label>
+      <div class="actions">
+        <button class="btn" id="howBtn" type="button">How to play</button>
+        <button class="btn" id="lbBtn" type="button">Leaderboard</button>
+        <button class="btn" id="profileBtn2" type="button">Profile</button>
+        <button class="btn" id="setupBack" type="button">← Title</button>
+        <button class="btn btn-primary" id="startBtn" type="button" style="margin-left:auto">PICK A SANDWICH</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2b. THE KITCHEN -->
+<div class="screen" id="kitchenScreen" hidden>
+  <canvas id="kitchenBg" aria-hidden="true"></canvas>
+  <div class="kboard">
+    <h2>Today's menu</h2>
+    <p class="ksub">Pick a sandwich to cook! One of each ingredient builds it. Answer quiz questions after each round to unlock fancier sandwiches.</p>
+    <div class="kprog" id="kProg"></div><p class="kstatus" id="kStatus" role="status"></p>
+    <div class="cards" id="cards"></div>
+    <div class="actions" style="justify-content:space-between">
+      <button class="btn" id="kitchenBack" type="button">← Setup</button>
+      <button class="btn btn-launch" id="cookBtn" type="button" style="flex:none;min-width:200px">COOK IT!</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. THE GAME -->
+<div class="shell side" id="gameScreen" hidden>
+  <main class="boardwrap">
+    <div class="board" id="board">
+      <canvas id="game" role="img" aria-label="BREADJECTORY: cannon, sandwich tower, hit-ingredient plate and the path of the fork. Drag the cannon barrel to aim, drag the tower plate to change distance."></canvas>
+      <div class="hud" aria-label="Game status">
+        <div class="card timer" id="timerCard"><div class="label">Time left</div><div class="time" id="timeText">2:00</div><div class="bar"><i id="timeBar"></i></div></div>
+        <div class="card stats">
+          <div class="stat"><div class="label">Score</div><div class="val" id="scoreText">0</div></div>
+          <div class="stat"><div class="label">Combo</div><div class="val" id="comboText">0</div><div class="sub" id="comboSub">&nbsp;</div></div>
+          <div class="stat"><div class="label">Lives</div><div class="hearts" id="hearts" aria-label="Lives left"></div><div class="sub" id="wrongSub">&nbsp;</div></div>
+        </div>
+        <div class="card order" id="orderCard">
+          <canvas id="orderIcon" width="240" height="90" aria-hidden="true"></canvas>
+          <div class="otext"><div class="label">Fetch this</div><div class="name" id="orderName">Pick a mode</div><div class="pips" id="pips" aria-hidden="true"></div></div>
+        </div>
+      </div>
+      <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      <aside class="drawer" id="labDrawer" aria-label="Physics lab" hidden>
+        <div class="lab-head"><h2>Physics lab</h2><span>m = 2 kg · s = 2 m · g = 9.8 m/s²</span></div>
+        <div class="lab" id="lab">
+          <div class="rd"><small>Acceleration</small><b id="rdA">0</b><em id="rdAf">a = F ÷ m</em></div>
+          <div class="rd"><small>Launch speed</small><b id="rdV">0</b><em id="rdVf">v = √(2·a·s)</em></div>
+          <div class="rd"><small>Sideways speed</small><b id="rdVx">0</b><em id="rdVxf">vₓ = v·cos θ</em></div>
+          <div class="rd"><small>Upward speed</small><b id="rdVy">0</b><em id="rdVyf">v_y = v·sin θ</em></div>
+          <div class="rd"><small>Time to tower</small><b id="rdT">0</b><em id="rdTf">t = d ÷ vₓ</em></div>
+          <div class="rd"><small>Last flight time</small><b id="rdLast">none yet</b><em id="rdLastf">from launch to impact</em></div>
+        </div>
+      </aside>
+
+      <div class="overlay" id="pausedSheet" hidden>
+        <div class="sheet">
+          <h2>Paused</h2><p>The clock is stopped. Take your time.</p>
+          <div class="actions"><button class="btn btn-primary" id="resumeBtn" type="button">Resume</button><button class="btn" id="pausedKitchen" type="button">Change sandwich</button><button class="btn" id="pausedSetup" type="button">Change mode</button><button class="btn" id="pausedTitle" type="button">Title screen</button></div>
+        </div>
+      </div>
+      <div class="overlay" id="end" hidden>
+        <div class="sheet">
+          <div class="hrow"><canvas class="mychar" id="endChar" width="90" height="110" aria-hidden="true"></canvas><div><h2 id="endTitle">Sandwich complete!</h2><p id="endText"></p></div></div>
+          <div class="endgrid" id="endGrid"></div>
+          <p class="hint" id="endLb" style="margin:0"></p>
+          <p class="hint" id="endQuizNote" style="margin:0"></p>
+          <div class="actions">
+            <button class="btn btn-primary" id="againBtn" type="button">Play again</button>
+            <button class="btn" id="endKitchenBtn" type="button">Change sandwich</button>
+            <button class="btn" id="changeBtn" type="button">Change mode</button>
+            <button class="btn" id="endLbBtn" type="button">Leaderboard</button>
+            <button class="btn" id="endTitleBtn" type="button">Title</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <section class="card panel" id="panel" aria-label="Cannon controls">
+    <div class="tools">
+      <button class="btn" id="pauseBtn" type="button" disabled>Pause</button>
+      <button class="btn" id="menuBtn" type="button">Menu</button>
+      <button class="btn" id="labBtn" type="button" aria-expanded="false">Lab</button>
+      <button class="btn" id="previewBtn" type="button">Preview: Full</button>
+      <button class="btn sfxBtn" type="button" aria-pressed="true">🔊</button>
+    </div>
+    <button class="btn tune" id="tuneBtn" type="button" aria-expanded="false">Fine tune ▾</button>
+    <div class="controls" id="controls"></div>
+    <button class="btn btn-launch" id="launchBtn" type="button" disabled>LAUNCH</button>
+  </section>
+
+  <div id="rotate" hidden>
+    <div class="sheet">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="20" y="6" width="24" height="52" rx="6" fill="#fff" stroke="#5e3322" stroke-width="3"/><circle cx="32" cy="51" r="2.5" fill="#5e3322"/></svg>
+      <h2>Rotate your phone</h2><p>BREADJECTORY is roomier sideways.</p>
+      <button class="btn" id="rotateOk" type="button">Play anyway</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO PLAY -->
+<div class="screen modal" id="howScreen" hidden>
+  <div class="sheet">
+    <h2>How to play</h2>
+    <div class="how-body">
+      <p><b>Goal:</b> pick a sandwich in the kitchen, then collect <b>one of each ingredient</b> on its recipe (the checklist at the top right). Drag the cannon barrel to aim, drag the tower's plate to change the distance (the sliders fine-tune both), then press Launch.</p>
+      <ul>
+        <li>Force pushes the fork along a barrel of length <code>s = 2 m</code>. Mass is <code>m = 2 kg</code>, so <code>a = F ÷ m</code> and <code>v = √(2·a·s)</code>.</li>
+        <li>Sideways the fork moves at a steady speed: <code>x = v·cos θ · t</code>. Up and down gravity pulls it: <code>y = v·sin θ · t − ½·g·t²</code>, with <code>g = 9.8 m/s²</code>.</li>
+        <li>Force, acceleration and velocity are linked. Change one and the other two follow.</li>
+      </ul>
+      <ul>
+        <li>Hit a fresh layer of an ingredient you still need: +100 points and +2 seconds. It flies to your plate on the right.</li>
+        <li>Hitting an ingredient you already have, or one that is not in the recipe, costs a life. So does a miss.</li>
+        <li>Complete the sandwich for a finish bonus: points for every second and every life you have left.</li>
+        <li>Three right layers in a row: +30 bonus on each one after that. Three wrong layers knock the tower over.</li>
+        <li>The stack never ends: a new random layer drops in after every hit. Medium and Hard add decoys from other recipes.</li>
+        <li>Hard mode: some layers are rotten (green spots and buzzing flies). Hit one and you lose ALL your lives at once.</li>
+        <li>Quiz: after every round Sandy asks questions about your own shots. You can skip a question and look at it in the summary afterwards. Right answers earn quiz points, and more points unlock new sandwiches, from the simplest to the best.</li>
+        <li>Profile: pick a hat, hair, outfit, skin tone and accessory for the character next to the cannon. The Tutorial button on the title screen teaches the basics in a safe sandbox.</li>
+        <li>Hide the arrow: no marker shows where the ticket's ingredient is. Those scores get a no-hint badge.</li>
+      </ul>
+    </div>
+    <div class="actions"><button class="btn btn-primary" data-close="howScreen" type="button">Got it</button></div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="screen modal" id="lbScreen" hidden>
+  <div class="sheet" style="width:100%;max-width:620px">
+    <h2>Leaderboard</h2>
+    <div class="tabs" role="tablist">
+      <button class="lbtab" role="tab" data-mode="easy" aria-selected="false" type="button">Easy</button>
+      <button class="lbtab" role="tab" data-mode="medium" aria-selected="true" type="button">Medium</button>
+      <button class="lbtab" role="tab" data-mode="hard" aria-selected="false" type="button">Hard</button>
+    </div>
+    <div class="chips" id="lbChips"></div>
+    <div id="lbBody"></div>
+    <div class="lbnote" id="lbNote"></div>
+    <div class="actions"><button class="btn btn-primary" data-close="lbScreen" type="button">Close</button></div>
+  </div>
+</div>
+
+<!-- QUIZ WITH SANDY -->
+<div class="screen modal" id="quizScreen" role="dialog" aria-modal="true" aria-labelledby="qTitle" hidden>
+  <div class="sheet qsheet">
+    <div class="qhead"><h2 id="qTitle">Quiz with <span class="qname">Sandy</span></h2><span class="label" id="qProg"></span><span class="newbest" id="qStars"></span><button class="btn sfxBtn" type="button" aria-pressed="true">🔊</button></div>
+    <div class="qwrap">
+      <div class="qsandy"><canvas id="qSandy" width="260" height="300" aria-hidden="true"></canvas></div>
+      <div class="qmain">
+        <p class="qsay" id="qSay" aria-live="polite"></p>
+        <div id="qBody">
+          <p class="qtext" id="qText" tabindex="-1"></p>
+          <div class="qopts" id="qOpts" role="group" aria-label="Answer choices"></div>
+          <div class="qnum" id="qNumRow" hidden><input id="qNum" type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer"><span id="qUnit"></span><button class="btn btn-primary" id="qCheck" type="button">Check</button></div>
+          <ul class="qhints" id="qHints" aria-label="Hints"></ul>
+          <p class="qstatus" id="qStatus" role="status"></p>
+          <div class="qexp" id="qExp" hidden></div>
+          <div class="actions"><button class="btn" id="qHint" type="button">Hint</button><button class="btn" id="qSkipQ" type="button">Skip question</button><button class="btn btn-primary" id="qNext" type="button" hidden>Next question</button></div>
+        </div>
+        <div id="qRecap" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div class="screen modal" id="profileScreen" hidden>
+  <div class="sheet" style="max-width:640px">
+    <h2>Profile</h2>
+    <div class="pf">
+      <canvas id="pfCanvas" width="180" height="220" aria-label="Character preview"></canvas>
+      <div class="pf-side"><div class="tabs" id="pfTabs" role="tablist"></div><div class="pf-grid" id="pfGrid"></div></div>
+    </div>
+    <div class="actions"><button class="btn" id="pfRandom" type="button">Surprise me</button><button class="btn" id="pfPose" type="button">Try a pose</button><button class="btn btn-primary" data-close="profileScreen" type="button" style="margin-left:auto">Done</button></div>
+  </div>
+</div>
+
+<!-- TUTORIAL -->
+<div class="screen modal" id="tutAsk" hidden>
+  <div class="sheet" style="max-width:420px"><h2>New here?</h2><p id="tutAskText"></p>
+    <div class="actions"><button class="btn btn-primary" id="tutAskYes" type="button">Start tutorial</button><button class="btn" id="tutAskNo" type="button">Skip tutorial</button></div></div>
+</div>
+<div id="tutorial" hidden>
+  <div id="tutSpot"></div>
+  <div id="tutBubble" role="dialog" aria-live="polite" aria-label="Tutorial">
+    <canvas id="tutChef" width="260" height="300" aria-hidden="true"></canvas>
+    <div><div class="label" id="tutStep"></div><p id="tutSay"></p>
+      <div class="actions"><button class="btn btn-primary" id="tutNext" type="button">Next</button><button class="btn" id="tutSkip" type="button">Skip tutorial</button></div></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body></html>
