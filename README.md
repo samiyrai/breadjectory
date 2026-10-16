@@ -5,15 +5,17 @@ Breadjectory is an educational physics game that teaches players about linear mo
 
 <img width="926" height="415" alt="image" src="https://github.com/user-attachments/assets/1609465f-93e8-40f4-9f4e-e878c98a4907" />
 
-<img width="926" height="416" alt="image" src="https://github.com/user-attachments/assets/e545079d-f33a-4650-9374-3b743b9395c5" />
 
 Features
 - Screens: Title (with a tappable mascot, Sandy), Setup, Kitchen (recipe menu), Game, How to Play, Leaderboard, Profile, Tutorial.
 - 3 difficulty modes and 5 sandwiches.
+<img width="926" height="419" alt="image" src="https://github.com/user-attachments/assets/340c564d-21a0-4808-bb05-e933297442ec" />
 - Physics Lab drawer: live readouts for acceleration, launch speed, sideways speed, upward speed, time to tower, and last flight time, each with its formula.
 - Trajectory preview: a dotted arc that can be set to Full, Short, or Off.
+<img width="926" height="416" alt="image" src="https://github.com/user-attachments/assets/17f6c241-c423-4995-94db-fc439e5e0b3c" />
 - Quiz with Sandy after every round, built from the player's own shots.
 - Tutorial sandbox with no timer, no lives lost, and no score saved.
+<img width="926" height="416" alt="image" src="https://github.com/user-attachments/assets/e545079d-f33a-4650-9374-3b743b9395c5" />
 - Profile: a customizable character with hats, hair, outfits, skin tones, and accessories.
 - Leaderboard per mode, using a shared database when available and otherwise browser storage.
 - Other added features: pause, sound toggle (synthesized effects), a "hide the arrow" challenge option, drag-to-aim controls, and a rotate-phone prompt.
